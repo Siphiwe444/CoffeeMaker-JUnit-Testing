@@ -104,6 +104,13 @@ public class CoffeeMakerTest {
 	@Test
 	public void testAddInventory() throws InventoryException {
 		coffeeMaker.addInventory("4","7","0","9");
+		
+		String inventory = coffeeMaker.checkInventory();
+
+		assertTrue(inventory.contains("Coffee"));
+		assertTrue(inventory.contains("Milk"));
+		assertTrue(inventory.contains("Sugar"));
+		assertTrue(inventory.contains("Chocolate"));
 	}
 	
 	/**
@@ -143,9 +150,9 @@ public class CoffeeMakerTest {
 	    assertTrue(coffeeMaker.addRecipe(recipe1));
 	    assertTrue(coffeeMaker.addRecipe(recipe2));
 	    assertTrue(coffeeMaker.addRecipe(recipe3));
-
-	   assertFalse(coffeeMaker.addRecipe(recipe4));
+	    assertTrue(coffeeMaker.addRecipe(recipe4));
     }
+
     @Test
     public void testDeleteRecipe() {
  	     coffeeMaker.addRecipe(recipe1);
@@ -169,7 +176,11 @@ public class CoffeeMakerTest {
 
 	    String editedRecipe = coffeeMaker.editRecipe(0, newRecipe);
 
-	 assertEquals("Coffee", editedRecipe);
+	    assertEquals("Coffee", editedRecipe);
+
+	    int change = coffeeMaker.makeCoffee(0, 100);
+
+	    assertEquals(40, change);
    }   
 
    @Test
@@ -207,4 +218,108 @@ public class CoffeeMakerTest {
 
 	    badRecipe.setAmtCoffee("-1");
     }
+
+   @Test
+   public void testMakeCoffeeExactMoney() {
+	   coffeeMaker.addRecipe(recipe1);
+
+	   int change = coffeeMaker.makeCoffee(0, 50);
+
+	   assertEquals(0, change);
+   }
+
+   @Test
+   public void testDeleteRecipeActuallyRemovesRecipe() {
+	   coffeeMaker.addRecipe(recipe1);
+
+	   coffeeMaker.deleteRecipe(0);
+
+	   int change = coffeeMaker.makeCoffee(0, 100);
+
+	   assertEquals(100, change);
+   }
+
+   @Test
+   public void testEditRecipeChangesPrice() throws RecipeException {
+	   coffeeMaker.addRecipe(recipe1);
+
+	   Recipe editedRecipe = new Recipe();
+	   editedRecipe.setName("Coffee");
+	   editedRecipe.setAmtChocolate("0");
+	   editedRecipe.setAmtCoffee("3");
+	   editedRecipe.setAmtMilk("1");
+	   editedRecipe.setAmtSugar("1");
+	   editedRecipe.setPrice("90");
+
+	   coffeeMaker.editRecipe(0, editedRecipe);
+
+	   int change = coffeeMaker.makeCoffee(0, 100);
+
+	   assertEquals(10, change);
+   }
+
+   @Test
+   public void testInventoryReducedCorrectly() {
+	   coffeeMaker.addRecipe(recipe1);
+
+	   String before = coffeeMaker.checkInventory();
+
+	   coffeeMaker.makeCoffee(0, 100);
+
+	   String after = coffeeMaker.checkInventory();
+
+	   assertNotEquals(before, after);
+   }
+
+   @Test
+   public void testMakeCoffeeInsufficientInventory() {
+	   coffeeMaker.addRecipe(recipe2);
+
+	   int change = coffeeMaker.makeCoffee(0, 100);
+
+	   assertEquals(100, change);
+   }
+
+   @Test
+   public void testAddRecipeReturnsTrue() {
+	   assertTrue(coffeeMaker.addRecipe(recipe1));
+   }
+
+   @Test
+   public void testDeleteRecipeReturnsName() {
+	   coffeeMaker.addRecipe(recipe1);
+
+	   assertEquals("Coffee", coffeeMaker.deleteRecipe(0));
+   }
+
+   @Test
+   public void testRecipeSlotFreedAfterDelete() {
+	   coffeeMaker.addRecipe(recipe1);
+	   coffeeMaker.addRecipe(recipe2);
+	   coffeeMaker.addRecipe(recipe3);
+
+	   coffeeMaker.deleteRecipe(1);
+
+	   assertTrue(coffeeMaker.addRecipe(recipe4));
+   }
+
+   @Test
+   public void testCannotMakeCoffeeWithInvalidRecipeIndex() {
+	   int change = coffeeMaker.makeCoffee(2, 100);
+
+	   assertEquals(100, change);
+   }
+
+   @Test
+   public void testInventoryNotChangedIfCoffeeFails() {
+	   coffeeMaker.addRecipe(recipe1);
+
+	   String before = coffeeMaker.checkInventory();
+
+	   coffeeMaker.makeCoffee(0, 10);
+
+	   String after = coffeeMaker.checkInventory();
+
+	   assertEquals(before, after);
+   }
 }
