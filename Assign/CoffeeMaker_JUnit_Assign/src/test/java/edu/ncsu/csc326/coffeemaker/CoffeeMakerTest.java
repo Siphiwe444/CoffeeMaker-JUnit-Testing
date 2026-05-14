@@ -18,7 +18,7 @@
  */
 package edu.ncsu.csc326.coffeemaker;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.*;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -132,4 +132,79 @@ public class CoffeeMakerTest {
 		assertEquals(25, coffeeMaker.makeCoffee(0, 75));
 	}
 
+    @Test
+    public void testAddDuplicateRecipe() {
+	     assertTrue(coffeeMaker.addRecipe(recipe1));
+	     assertFalse(coffeeMaker.addRecipe(recipe1));
+    }
+
+    @Test
+    public void testAddMoreThanThreeRecipes() {
+	    assertTrue(coffeeMaker.addRecipe(recipe1));
+	    assertTrue(coffeeMaker.addRecipe(recipe2));
+	    assertTrue(coffeeMaker.addRecipe(recipe3));
+
+	   assertFalse(coffeeMaker.addRecipe(recipe4));
+    }
+    @Test
+    public void testDeleteRecipe() {
+ 	     coffeeMaker.addRecipe(recipe1);
+
+	     String deletedRecipe = coffeeMaker.deleteRecipe(0);
+
+	    assertEquals("Coffee", deletedRecipe);
+    }
+
+    @Test
+     public void testEditRecipe() throws RecipeException {
+	    coffeeMaker.addRecipe(recipe1);
+
+	    Recipe newRecipe = new Recipe();
+	    newRecipe.setName("Coffee");
+	    newRecipe.setAmtChocolate("2");
+	    newRecipe.setAmtCoffee("5");
+	    newRecipe.setAmtMilk("2");
+	    newRecipe.setAmtSugar("2");
+	    newRecipe.setPrice("60");
+
+	    String editedRecipe = coffeeMaker.editRecipe(0, newRecipe);
+
+	 assertEquals("Coffee", editedRecipe);
+   }   
+
+   @Test
+   public void testMakeCoffeeNotEnoughMoney() {
+	   coffeeMaker.addRecipe(recipe1);
+
+	   int change = coffeeMaker.makeCoffee(0, 25);
+
+	   assertEquals(25, change);
+    }
+
+    @Test
+    public void testInventoryDecreasesAfterCoffee() {
+	   coffeeMaker.addRecipe(recipe1);
+
+	    String inventoryBefore = coffeeMaker.checkInventory();
+
+	    coffeeMaker.makeCoffee(0, 100);
+
+	    String inventoryAfter = coffeeMaker.checkInventory();
+
+	    assertNotEquals(inventoryBefore, inventoryAfter);
+    }
+
+    @Test(expected = RecipeException.class)
+    public void testNegativeRecipePrice() throws RecipeException {
+	    Recipe badRecipe = new Recipe();
+
+	    badRecipe.setPrice("-10");
+   }
+
+   @Test(expected = RecipeException.class)
+    public void testNegativeCoffeeAmount() throws RecipeException {
+	  Recipe badRecipe = new Recipe();
+
+	    badRecipe.setAmtCoffee("-1");
+    }
 }
